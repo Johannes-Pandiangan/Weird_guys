@@ -3,26 +3,41 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SmartLibrary - Beranda</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <title>Perpustakaan Digital</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Tambahan efek gradasi overlay agar tombol lebih jelas */
+    .overlay {
+      background: linear-gradient(to bottom right, rgba(0,0,0,0.5), rgba(0,0,0,0.6));
+    }
+  </style>
 </head>
-<body class="bg-gray-100 flex flex-col min-h-screen">
+<body class="h-screen w-screen bg-cover bg-center relative"
+  style="background-image: url('https://pengadaan.penerbitdeepublish.com/wp-content/uploads/2023/04/ciri-fasilitas-perpustakaan-yang-baik.webp');">
 
-  <header class="bg-blue-700 text-white py-4">
-    <h1 class="text-center text-3xl font-bold">📚 SmartLibrary</h1>
-  </header>
+  <!-- Overlay gelap agar teks dan tombol lebih kontras -->
+  <div class="overlay absolute inset-0"></div>
 
-  <main class="flex flex-1 flex-col items-center justify-center px-4 text-center">
-    <h2 class="text-2xl font-semibold mb-6">Selamat Datang di SmartLibrary</h2>
-    <p class="text-gray-600 mb-8">Pilih jenis login untuk melanjutkan:</p>
-    <div class="flex flex-col sm:flex-row gap-4">
-      <a href="user/login.html" class="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-800 transition">Login sebagai User</a>
-      <a href="admin/login.html" class="bg-gray-700 text-white px-6 py-3 rounded hover:bg-gray-900 transition">Login sebagai Admin</a>
+  <!-- Konten utama -->
+  <div class="relative z-10 flex flex-col items-center justify-center h-full text-center text-white">
+    <h1 class="text-4xl md:text-6xl font-bold mb-8 drop-shadow-lg">Smart Library</h1>
+    <p class="text-lg md:text-xl mb-10 drop-shadow-md">Selamat datang di Smart Library. Lihat informasi buku untuk dipinjam</p>
+
+    <div class="flex flex-col md:flex-row gap-4">
+      <a href="user/home.html" 
+         class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg transition duration-300">
+         Login sebagai User
+      </a>
+      <a href="admin/login.html" 
+         class="px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-lg transition duration-300">
+         Login sebagai Admin
+      </a>
     </div>
-  </main>
+  </div>
 
-  <footer class="bg-gray-800 text-white text-center py-3 mt-6">
-    <p>&copy; 2025 SmartLibrary. Weird guys.</p>
+  <!-- Footer -->
+  <footer class="absolute bottom-0 left-0 right-0 text-center py-3 bg-black/50 text-white text-sm">
+    © 2025 Perpustakaan Digital | Dibuat untuk proyek front-end
   </footer>
 </body>
 </html>

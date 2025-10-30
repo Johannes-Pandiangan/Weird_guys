@@ -1,19 +1,33 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login Admin - SmartLibrary</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/admin-style.css">
 </head>
-<body class="bg-gray-50 flex flex-col min-h-screen justify-center items-center">
-  <div class="bg-white shadow-lg p-6 rounded-lg w-full max-w-md">
-    <h2 class="text-2xl font-semibold mb-4 text-center">Login Admin</h2>
-    <form onsubmit="return false" class="space-y-4">
-      <input type="text" placeholder="Username" class="w-full border p-2 rounded" required>
-      <input type="password" placeholder="Password" class="w-full border p-2 rounded" required>
-      <a href="home.html" class="block bg-green-600 text-white text-center py-2 rounded hover:bg-green-700 transition">Login</a>
+<body class="bg-gray-100 flex flex-col justify-center items-center h-screen">
+  <div class="bg-white p-8 rounded-lg shadow-lg w-80">
+    <h2 class="text-2xl font-bold text-center text-indigo-700 mb-6">Login Admin</h2>
+    <form id="loginForm" class="flex flex-col gap-4">
+      <input type="text" id="username" placeholder="Username" class="border p-2 rounded focus:outline-indigo-500" required>
+      <input type="password" id="password" placeholder="Password" class="border p-2 rounded focus:outline-indigo-500" required>
+      <button type="submit" class="bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">Login</button>
     </form>
+    <a href="../index.html" class="text-blue-600 hover:underline block text-center">Kembali ke Halaman Utama</a>
   </div>
+  <footer class="absolute bottom-4 text-sm text-gray-500">
+    © 2025 SmartLibrary
+  </footer>
+
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", function(e){
+      e.preventDefault();
+      // Tidak ada validasi, langsung ke dashboard admin
+      window.location.href = "home.html";
+    });
+  </script>
 </body>
 </html>
+

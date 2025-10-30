@@ -1,32 +1,31 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SmartLibrary - Admin</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Admin - SmartLibrary</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/admin-style.css">
+  <script src="js/admin.js" defer></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col">
-  <header class="bg-green-700 text-white p-4 flex justify-between items-center">
-    <h1 class="font-bold text-xl">SmartLibrary (Admin)</h1>
-    <a href="../index.html" class="bg-red-500 px-3 py-1 rounded hover:bg-red-600">Logout</a>
-  </header>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+  <header class="bg-indigo-700 text-white py-4 px-6 flex justify-between items-center">
+  <span class="text-2xl font-semibold">Dashboard Admin</span>
+  <a href="../index.html" class="bg-red-500 px-3 py-1 rounded hover:bg-red-600">Logout</a>
+</header>
 
-  <main class="p-4 flex-1">
-    <h2 class="text-2xl font-semibold mb-4">Kelola Buku</h2>
-    <form id="bookForm" class="flex flex-col sm:flex-row gap-2 mb-4">
-      <input id="title" type="text" placeholder="Judul Buku" class="flex-1 border p-2 rounded" required>
-      <input id="author" type="text" placeholder="Penulis" class="flex-1 border p-2 rounded" required>
-      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Tambah</button>
+  <main class="flex-grow container mx-auto p-6">
+    <h2 class="text-xl font-semibold mb-4">Tambah Buku</h2>
+    <form id="addBookForm" class="flex flex-col sm:flex-row gap-4 mb-8">
+      <input type="text" id="title" placeholder="Judul Buku" class="border p-2 rounded flex-1" required>
+      <input type="text" id="author" placeholder="Penulis" class="border p-2 rounded flex-1" required>
+      <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Tambah</button>
     </form>
 
-    <div id="bookList" class="grid sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
+    <h2 class="text-xl font-semibold mb-4">Daftar Buku</h2>
+    <div id="bookList" class="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-4"></div>
   </main>
 
-  <footer class="bg-gray-800 text-white text-center py-3">
-    <p>&copy; 2025 SmartLibrary</p>
-  </footer>
-
-  <script src="js/admin.js"></script>
+  <footer class="bg-gray-200 py-3 text-center text-sm text-gray-700">© 2025 SmartLibrary</footer>
 </body>
 </html>

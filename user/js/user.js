@@ -1,22 +1,23 @@
 document.addEventListener("DOMContentLoaded", () => {
   const books = JSON.parse(localStorage.getItem("books")) || [];
-  const bookContainer = document.getElementById("bookContainer");
+  const bookList = document.getElementById("bookList");
   const searchInput = document.getElementById("searchInput");
 
-  function renderBooks(filter = "") {
-    const filteredBooks = books.filter(book => 
-      book.title.toLowerCase().includes(filter.toLowerCase())
-    );
-
-    bookContainer.innerHTML = filteredBooks.map(book => `
-      <div class="bg-white shadow-lg p-4 rounded">
-        <h3 class="font-bold text-lg">${book.title}</h3>
-        <p class="text-gray-600">Penulis: ${book.author}</p>
-        <button class="bg-blue-500 text-white px-3 py-1 mt-2 rounded hover:bg-blue-600">Pinjam</button>
-      </div>
-    `).join("");
+  function displayBooks(filter = "") {
+    bookList.innerHTML = "";
+    const filtered = books.filter(b => b.title.toLowerCase().includes(filter.toLowerCase()));
+    filtered.forEach(book => {
+      const statusClass = book.status === "Tersedia" ? "text-green-600" : "text-red-600";
+      const card = `
+        <div class="border p-4 rounded shadow bg-white">
+          <h3 class="font-semibold text-lg">${book.title}</h3>
+          <p class="text-gray-700">${book.author}</p>
+          <p class="${statusClass} font-medium mt-2">${book.status}</p>
+        </div>`;
+      bookList.innerHTML += card;
+    });
   }
 
-  searchInput.addEventListener("input", e => renderBooks(e.target.value));
-  renderBooks();
+  displayBooks();
+  searchInput.addEventListener("input", (e) => displayBooks(e.target.value));
 });

@@ -1,5 +1,5 @@
 let currentPage = 1;
-const itemsPerPage = 2;
+const itemsPerPage = 10;
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -251,5 +251,6 @@ function renderBooks() {
   // initial render
   renderBooks();
 });
+
 
 

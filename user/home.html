@@ -1,26 +1,28 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard User - SmartLibrary</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>User - SmartLibrary</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="css/user-style.css">
   <script src="js/user.js" defer></script>
 </head>
-<body class="bg-gray-50 flex flex-col min-h-screen">
-  <header class="bg-indigo-700 text-white py-4 text-center text-2xl font-semibold flex justify-between items-center px-4">
-    <span>SmartLibrary</span>
-    <a href="../index.html" class="bg-white text-indigo-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition">Kembali</a>
+<body class="min-h-screen bg-gray-50 flex flex-col">
+  <header class="bg-indigo-700 text-white p-4">
+    <div class="container mx-auto flex justify-between">
+      <div class="font-semibold">SmartLibrary</div>
+      <a href="../index.html" class="bg-white text-indigo-700 px-3 py-1 rounded">Beranda</a>
+    </div>
   </header>
 
-  <main class="flex-grow container mx-auto p-6">
-    <div class="mb-6">
-      <input id="searchInput" type="text" placeholder="Cari buku..." class="border p-2 rounded w-full focus:outline-indigo-500">
+  <main class="container mx-auto p-6 flex-grow">
+    <div class="mb-4">
+      <input id="searchInput" type="text" placeholder="Cari buku..." class="w-full p-2 border rounded" />
     </div>
-    <div id="bookList" class="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-4"></div>
+
+    <div id="bookList" class="grid md:grid-cols-3 sm:grid-cols-2 gap-4"></div>
   </main>
 
-  <footer class="bg-gray-200 py-3 text-center text-sm text-gray-700">© 2025 SmartLibrary</footer>
+  <footer class="bg-gray-100 p-3 text-center text-sm text-gray-600">© 2025 SmartLibrary</footer>
 </body>
 </html>

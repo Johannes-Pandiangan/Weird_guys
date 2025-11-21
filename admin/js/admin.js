@@ -1,3 +1,6 @@
+let currentPage = 1;
+const itemsPerPage = 10;
+
 document.addEventListener("DOMContentLoaded", () => {
 
 
@@ -41,55 +44,84 @@ document.addEventListener("DOMContentLoaded", () => {
     renderBooks();
   }
 
-  function renderBooks() {
-    bookListEl.innerHTML = "";
-    if (books.length === 0) {
-      bookListEl.innerHTML = `<div class="col-span-3 text-gray-600">Belum ada buku. Tambah menggunakan tombol di atas.</div>`;
-      return;
-    }
+  function renderPagination() {
+  const totalPages = Math.ceil(books.length / itemsPerPage);
+  const pagEl = document.getElementById("pagination");
 
-    books.forEach((book, i) => {
-      const statusClass = (book.status === "Tersedia") ? "text-green-600" : (book.stock > 0 ? "text-yellow-600" : "text-red-600");
-      const cover = book.cover ? `<img src="${escapeHtml(book.cover)}" alt="cover" class="w-full h-44 object-cover rounded mb-2">` : '';
-      const borrowersHtml = (book.borrowers && book.borrowers.length > 0)
-        ? `<div class="mt-2 border-t pt-2 text-sm text-gray-700">
-            <strong>Daftar peminjam:</strong>
-            <ul class="mt-1 space-y-1">${book.borrowers.map((b, idx) => `<li>${escapeHtml(b.name)} — ${escapeHtml(b.phone)} <button onclick="adminRemoveBorrower(${i}, ${idx})" class="ml-2 text-xs text-red-600">hapus</button></li>`).join('')}</ul>
-           </div>`
-        : '';
+  pagEl.innerHTML = "";
 
-      bookListEl.insertAdjacentHTML('beforeend', `
-        <div class="bg-white border rounded p-4 shadow-sm">
-          ${cover}
-          <h3 class="font-semibold text-lg">${escapeHtml(book.title)}</h3>
-          <p class="text-sm text-gray-600">${escapeHtml(book.author)} • ${escapeHtml(book.publisher || '')} ${book.year ? '• ' + escapeHtml(book.year) : ''}</p>
-          <p class="mt-2 text-sm text-gray-700">${escapeHtml(book.description || '').substring(0, 180)}${(book.description && book.description.length>180)?'...':''}</p>
+  for (let i = 1; i <= totalPages; i++) {
+    pagEl.insertAdjacentHTML(
+      "beforeend",
+      `
+      <button
+        class="px-3 py-1 border rounded ${i === currentPage ? 'bg-indigo-600 text-white' : 'bg-white'}"
+        onclick="changePage(${i})"
+      >
+        ${i}
+      </button>
+    `
+    );
+  }
+}
 
-          <div class="mt-3 flex items-center justify-between">
-            <div class="text-sm ${statusClass} font-medium">Status: ${escapeHtml(book.status)} (${book.stock} stok)</div>
-            <div class="flex gap-2">
-              <button onclick="adminShowBorrowForm(${i})" class="px-2 py-1 bg-yellow-400 text-sm rounded">Pinjam</button>
-              <button onclick="adminStartEdit(${i})" class="px-2 py-1 bg-blue-500 text-white text-sm rounded">Edit</button>
-              <button onclick="adminDelete(${i})" class="px-2 py-1 bg-red-500 text-white text-sm rounded">Hapus</button>
-            </div>
-          </div>
+window.changePage = function (page) {
+  currentPage = page;
+  renderBooks();
+};
 
-          ${borrowersHtml}
 
-          <!-- area borrow form inline (hidden by default) -->
-          <div id="borrowForm-${i}" class="mt-3 hidden bg-gray-50 p-3 rounded border">
-            <div class="text-sm mb-2">Masukkan data peminjam untuk buku ini:</div>
-            <input id="bname-${i}" placeholder="Nama peminjam" class="p-2 border rounded w-full mb-2" />
-            <input id="bphone-${i}" placeholder="No. telepon" class="p-2 border rounded w-full mb-2" />
-            <div class="flex justify-end gap-2">
-              <button onclick="adminCancelBorrow(${i})" class="px-3 py-1 border rounded">Batal</button>
-              <button onclick="adminConfirmBorrow(${i})" class="px-3 py-1 bg-indigo-600 text-white rounded">Konfirmasi Pinjam</button>
-            </div>
+function renderBooks() {
+  bookListEl.innerHTML = "";
+
+  const start = (currentPage - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+
+  const paginatedBooks = books.slice(start, end);
+
+  if (books.length === 0) {
+    bookListEl.innerHTML = `<div class="col-span-3 text-gray-600">Belum ada buku.</div>`;
+    return;
+  }
+
+  paginatedBooks.forEach((book, i) => {
+    const realIndex = start + i;
+
+    const statusClass =
+      book.status === "Tersedia"
+        ? "text-green-600"
+        : book.stock > 0
+        ? "text-yellow-600"
+        : "text-red-600";
+
+    const cover = book.cover
+      ? `<img src="${escapeHtml(book.cover)}" class="w-full h-44 object-cover rounded mb-2">`
+      : "";
+
+    bookListEl.insertAdjacentHTML(
+      "beforeend",
+      `
+      <div class="bg-white border rounded p-4 shadow-sm">
+        ${cover}
+        <h3 class="font-semibold text-lg">${escapeHtml(book.title)}</h3>
+        <p class="text-sm text-gray-600">${escapeHtml(book.author || "")}</p>
+
+        <div class="mt-3 flex items-center justify-between">
+          <div class="text-sm ${statusClass}">Status: ${book.status} (${book.stock})</div>
+
+          <div class="flex gap-2">
+            <button onclick="adminShowBorrowForm(${realIndex})" class="px-2 py-1 bg-yellow-400 text-sm rounded">Pinjam</button>
+            <button onclick="adminStartEdit(${realIndex})" class="px-2 py-1 bg-blue-500 text-white text-sm rounded">Edit</button>
+            <button onclick="adminDelete(${realIndex})" class="px-2 py-1 bg-red-500 text-white text-sm rounded">Hapus</button>
           </div>
         </div>
-      `);
-    });
-  }
+      </div>
+    `
+    );
+  });
+
+  renderPagination();
+}
 
   // Helpers for escaping
   function escapeHtml(str) {
@@ -219,3 +251,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // initial render
   renderBooks();
 });
+
+
+

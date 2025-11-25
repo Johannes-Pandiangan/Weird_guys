@@ -3,13 +3,13 @@ require('dotenv').config();
 
 
 const pool = new Pool({
-    user: process.env.PGUSER,
-    host: process.env.PGHOST,
-    port: process.env.PGPORT,
-    database: process.env.PGDATABASE,
-    password: process.env.PGPASSWORD,
-    
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false 
+  user: process.env.PGUSER,
+  host: process.env.PGHOST,
+  database: process.env.PGDATABASE,
+  password: process.env.PGPASSWORD,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
 
@@ -72,4 +72,5 @@ initializeDatabase();
 module.exports = {
   query: (text, params) => pool.query(text, params),
   pool,
+
 };

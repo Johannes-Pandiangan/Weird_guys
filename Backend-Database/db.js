@@ -40,37 +40,39 @@ const CREATE_ADMIN_TABLE_QUERY = `
 const DEFAULT_USERNAME = 'admin';
 const DEFAULT_PASSWORD = 'password';
 
-
+// FUNGSI INI HANYA AKAN DIJALANKAN DARI SERVER.JS
 async function initializeDatabase() {
-  try {
-    await pool.query(CREATE_BOOKS_TABLE_QUERY); 
-    console.log("PostgreSQL: Tabel 'books' siap.");
-    
-    await pool.query(CREATE_ADMIN_TABLE_QUERY); 
-    console.log("PostgreSQL: Tabel 'admin_users' siap.");
+    let client;
+    try {
+        client = await pool.connect(); 
+        console.log("✅ Connected to PostgreSQL Client for Initialization");
 
-    const checkAdmin = await pool.query('SELECT * FROM admin_users WHERE username = $1', [DEFAULT_USERNAME]);
+        await client.query(CREATE_BOOKS_TABLE_QUERY); 
+        console.log("PostgreSQL: Tabel 'books' siap.");
+        
+        await client.query(CREATE_ADMIN_TABLE_QUERY); 
+        console.log("PostgreSQL: Tabel 'admin_users' siap.");
 
-    if (checkAdmin.rows.length === 0) {
-        await pool.query(
-            'INSERT INTO admin_users (username, password) VALUES ($1, $2)',
-            [DEFAULT_USERNAME, DEFAULT_PASSWORD]
-        );
-        console.log(`PostgreSQL: Admin default '${DEFAULT_USERNAME}' dengan password: '${DEFAULT_PASSWORD}' telah dibuat.`);
+        const checkAdmin = await client.query('SELECT * FROM admin_users WHERE username = $1', [DEFAULT_USERNAME]);
+
+        if (checkAdmin.rows.length === 0) {
+            await client.query(
+                'INSERT INTO admin_users (username, password) VALUES ($1, $2)',
+                [DEFAULT_USERNAME, DEFAULT_PASSWORD]
+            );
+            console.log(`PostgreSQL: Admin default '${DEFAULT_USERNAME}' telah dibuat.`);
+        }
+        
+    } catch (err) {
+        console.error("❌ Database connection or initialization error:", err.stack);
+        throw err; 
+    } finally {
+        if (client) client.release();
     }
-
-  } catch (err) {
-    console.error("PostgreSQL: Gagal terhubung atau inisialisasi tabel.", err);
-    process.exit(1); 
-  }
 }
 
-
-initializeDatabase();
-
-
 module.exports = {
+  initializeDatabase,
   query: (text, params) => pool.query(text, params),
   pool,
-
 };

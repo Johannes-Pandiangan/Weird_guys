@@ -3,19 +3,10 @@
   "builds": [
     { 
       "src": "Backend-Database/server.js", 
-      "use": "@vercel/node",
-      "config": { "includeFiles": ["Backend-Database/db.js"] } 
+      "use": "@vercel/node" 
     }
   ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/Backend-Database/server.js" }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" }
-      ]
-    }
   ]
 }

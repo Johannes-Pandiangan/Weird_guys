@@ -51,7 +51,7 @@ function deleteTempFile(filePath) {
 app.use(cors()); 
 app.use(express.json()); 
 
-const PROJECT_ROOT = path.join(__dirname, '..', '..');
+const PROJECT_ROOT = path.join(__dirname, '..');
 
 app.use(express.static(PROJECT_ROOT));
 

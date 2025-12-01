@@ -51,6 +51,9 @@ function deleteTempFile(filePath) {
 app.use(cors()); 
 app.use(express.json()); 
 
+const PROJECT_ROOT = path.join(__dirname, '..', '..');
+
+app.use(express.static(PROJECT_ROOT));
 
 app.post('/api/admin/login', async (req, res) => {
     const { username, password } = req.body;
@@ -225,7 +228,7 @@ app.delete('/api/books/:id', async (req, res) => {
 });
 
 app.get('/', (req, res) => {
-    res.send('Smart Library API sedang berjalan...');
+    res.sendFile(path.join(PROJECT_ROOT, 'index.html'));
 });
 
 app.listen(PORT, () => {

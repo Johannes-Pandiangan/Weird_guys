@@ -231,6 +231,18 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(PROJECT_ROOT, 'index.html'));
 });
 
+app.get('/admin/login.html', (req, res) => {
+    res.sendFile(path.join(PROJECT_ROOT, 'admin', 'login.html'));
+});
+
+app.get('/user/home.html', (req, res) => {
+    res.sendFile(path.join(PROJECT_ROOT, 'user', 'home.html'));
+});
+
+app.get('/admin/home.html', (req, res) => {
+    res.sendFile(path.join(PROJECT_ROOT, 'admin', 'home.html'));
+});
+
 app.listen(PORT, () => {
   console.log(`Server berjalan di port ${PORT}`);
 });

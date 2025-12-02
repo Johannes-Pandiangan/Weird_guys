@@ -1,21 +1,34 @@
 document.addEventListener("DOMContentLoaded", () => {
   const bookListEl = document.getElementById("bookList");
   const searchInput = document.getElementById("searchInput");
+  const API_URL = "https://weird-guys-five.vercel.app/api/books"; // URL API Backend
 
   let currentPage = 1;
   const itemsPerPage = 10;
+  let allBooks = []; 
 
-  function loadBooks() {
-    return JSON.parse(localStorage.getItem("books")) || [];
+  async function fetchBooks() {
+    try {
+      const response = await fetch(API_URL); 
+      if (!response.ok) {
+        throw new Error('Gagal mengambil data buku dari server.');
+      }
+      allBooks = await response.json(); 
+    } catch (error) {
+      console.error("Error fetching books:", error);
+      allBooks = []; 
+    }
   }
 
-  function render(filter = "") {
-    const books = loadBooks();
+  async function render(filter = "") {
+    await fetchBooks(); 
+    const books = allBooks; 
 
     const filtered = books.filter(
       (b) =>
         (b.title || "").toLowerCase().includes(filter.toLowerCase()) ||
-        (b.author || "").toLowerCase().includes(filter.toLowerCase())
+        (b.author || "").toLowerCase().includes(filter.toLowerCase()) ||
+        (b.category || "").toLowerCase().includes(filter.toLowerCase())
     );
 
     const start = (currentPage - 1) * itemsPerPage;
@@ -29,12 +42,15 @@ document.addEventListener("DOMContentLoaded", () => {
       bookListEl.innerHTML = `
         <div class="col-span-3 text-gray-600">Tidak ada buku ditemukan.</div>
       `;
+      renderPagination(0);
       return;
     }
 
     paginated.forEach((book) => {
-      const cover = book.cover
-        ? `<img src="${book.cover}" class="w-full h-40 object-cover rounded mb-2">`
+      // MODIFIKASI: Gunakan URL lengkap untuk cover
+      const coverUrl = book.cover ? book.cover : null;
+      const cover = coverUrl
+        ? `<img src="${coverUrl}" class="w-full h-40 object-cover rounded mb-2">`
         : "";
 
       const statusClass =

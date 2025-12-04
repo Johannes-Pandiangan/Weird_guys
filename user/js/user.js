@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const bookListEl = document.getElementById("bookList");
   const searchInput = document.getElementById("searchInput");
-  const API_URL = "https://weird-guys-five.vercel.app/api/books"; // URL API Backend
+  const API_URL = /*"https://weird-guys-five.vercel.app/api/books";*/"http://localhost:5000/api/books"; 
 
   let currentPage = 1;
   const itemsPerPage = 10;
@@ -47,10 +47,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     paginated.forEach((book) => {
-      // MODIFIKASI: Gunakan URL lengkap untuk cover
+      // MODIFIKASI: Gunakan wrapper div untuk object-contain dan tinggi yang seragam
       const coverUrl = book.cover ? book.cover : null;
       const cover = coverUrl
-        ? `<img src="${coverUrl}" class="w-full h-40 object-cover rounded mb-2">`
+        ? `
+            <div class="w-full h-56 bg-gray-100 flex items-center justify-center rounded mb-2 overflow-hidden border border-gray-300">
+                <img src="${coverUrl}" class="h-full w-auto object-contain">
+            </div>
+          `
         : "";
 
       const statusClass =

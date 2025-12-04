@@ -1,10 +1,18 @@
 let currentPage = 1;
 const itemsPerPage = 10;
-const API_URL = "https://weird-guys-five.vercel.app/api/books"; // URL API Backend
+const API_URL = /*"https://weird-guys-five.vercel.app/api/books";*/"http://localhost:5000/api/books";
+const LOGGED_IN_ADMIN_NAME = localStorage.getItem('adminName') || 'Admin Tak Dikenal';
+
 
 document.addEventListener("DOMContentLoaded", () => {
   let books = []; 
   let editBookId = null; 
+
+  // BARU: Tampilkan nama admin di header
+  const adminNameDisplay = document.getElementById('adminNameDisplay');
+  if (adminNameDisplay) {
+      adminNameDisplay.textContent = LOGGED_IN_ADMIN_NAME;
+  }
 
   // Elements
   const bookListEl = document.getElementById("bookList");
@@ -20,8 +28,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const f_publisher = document.getElementById("f_publisher");
   const f_year = document.getElementById("f_year");
   const f_category = document.getElementById("f_category");
-  const f_cover_file = document.getElementById("f_cover_file"); // Ganti dari f_cover
-  const f_existing_cover = document.getElementById("f_existing_cover"); // Tambah hidden input
+  const f_cover_file = document.getElementById("f_cover_file"); 
+  const f_existing_cover = document.getElementById("f_existing_cover"); 
   const f_stock = document.getElementById("f_stock");
   const f_description = document.getElementById("f_description");
   const f_status = document.getElementById("f_status");
@@ -188,8 +196,13 @@ document.addEventListener("DOMContentLoaded", () => {
             
         // Cover menggunakan URL lengkap
         const coverUrl = book.cover ? book.cover : null;
+        // MODIFIKASI: Menggunakan wrapper div untuk object-contain dan tinggi yang seragam
         const cover = coverUrl
-          ? `<img src="${escapeHtml(coverUrl)}" class="w-full h-44 object-cover rounded mb-2">`
+          ? `
+            <div class="w-full h-56 bg-gray-100 flex items-center justify-center rounded mb-2 overflow-hidden border border-gray-300">
+                <img src="${escapeHtml(coverUrl)}" class="h-full w-auto object-contain">
+            </div>
+          `
           : "";
 
         // TAMPILAN BARU: Tampilkan daftar peminjam dengan detail dan tombol "Dikembalikan"
@@ -202,6 +215,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <p class="text-xs text-gray-800 mb-2">
                   <strong>No. HP:</strong> ${escapeHtml(b.phone)}
                 </p>
+                ${b.handledBy ? `<p class="text-xs text-gray-800 mb-2"><strong>Dilayani oleh:</strong> ${escapeHtml(b.handledBy)}</p>` : ''} 
                 <button 
                   onclick="adminRemoveBorrower(${dbId}, ${bIdx})" 
                   class="w-full px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 transition"
@@ -213,7 +227,7 @@ document.addEventListener("DOMContentLoaded", () => {
           .join('');
         
         const currentBorrowers = (book.borrowers || []).length;
-        const totalStock = book.stock + currentBorrowers;
+        const totalStock = (book.stock || 0) + currentBorrowers;
 
         bookListEl.insertAdjacentHTML(
           "beforeend",
@@ -227,6 +241,8 @@ document.addEventListener("DOMContentLoaded", () => {
               <div class="text-sm ${statusClass}">Status: ${book.status} (${book.stock} stok tersisa dari ${totalStock})</div>
             </div>
             
+            ${book.added_by_admin ? `<p class="text-sm text-gray-600 mt-1">Ditambahkan oleh: <strong>${escapeHtml(book.added_by_admin)}</strong></p>` : ''} 
+
             <div class="mt-3">
               <p class="text-sm font-semibold">Peminjam (${currentBorrowers}):</p>
               ${borrowerList || '<p class="text-xs text-gray-500">Tidak ada peminjam saat ini.</p>'}
@@ -288,6 +304,10 @@ document.addEventListener("DOMContentLoaded", () => {
       
       const existingBook = books.find(b => b.id === editBookId);
       formData.append('borrowers_json', JSON.stringify(existingBook.borrowers || [])); 
+      
+      // BARU: Pertahankan added_by_admin yang sudah ada
+      formData.append('added_by_admin', existingBook.added_by_admin || LOGGED_IN_ADMIN_NAME); 
+
 
       if (f_cover_file.files.length > 0) {
           // File baru diupload
@@ -304,6 +324,8 @@ document.addEventListener("DOMContentLoaded", () => {
       // Mode Tambah (POST)
       method = 'POST';
       formData.append('borrowers_json', JSON.stringify([])); 
+      // BARU: Tambahkan nama admin yang sedang login
+      formData.append('added_by_admin', LOGGED_IN_ADMIN_NAME); 
       
       if (f_cover_file.files.length > 0) {
           formData.append('cover_file', f_cover_file.files[0]);
@@ -360,7 +382,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!phone) return alert("Nomor telepon wajib diisi");
     if (book.stock <= 0) return alert("Stok habis, tidak bisa dipinjam");
     
-    const borrower = { name, phone, date: new Date().toLocaleString() };
+    // BARU: Tambahkan field handledBy
+    const borrower = { name, phone, date: new Date().toLocaleString(), handledBy: LOGGED_IN_ADMIN_NAME };
     book.borrowers = book.borrowers || [];
     book.borrowers.push(borrower);
     book.stock = Number(book.stock) - 1;
@@ -379,6 +402,8 @@ document.addEventListener("DOMContentLoaded", () => {
     formData.append('status', book.status);
     formData.append('borrowers_json', JSON.stringify(book.borrowers));
     if (book.cover) formData.append('existing_cover', book.cover); 
+    // BARU: Sertakan added_by_admin untuk PUT
+    formData.append('added_by_admin', book.added_by_admin || LOGGED_IN_ADMIN_NAME); 
     
     const result = await saveBook(formData, 'PUT', id); 
 
@@ -412,6 +437,8 @@ document.addEventListener("DOMContentLoaded", () => {
     formData.append('status', book.status);
     formData.append('borrowers_json', JSON.stringify(book.borrowers));
     if (book.cover) formData.append('existing_cover', book.cover); 
+    // BARU: Sertakan added_by_admin untuk PUT
+    formData.append('added_by_admin', book.added_by_admin || LOGGED_IN_ADMIN_NAME); 
     
     const result = await saveBook(formData, 'PUT', bookId);
     

@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const bookListEl = document.getElementById("bookList");
   const searchInput = document.getElementById("searchInput");
-  const API_URL = /*"https://weird-guys-five.vercel.app/api/books";*/"http://localhost:5000/api/books"; 
+  const API_URL ="https://weird-guys-backend.vercel.app/api/books"; 
 
   let currentPage = 1;
   const itemsPerPage = 10;

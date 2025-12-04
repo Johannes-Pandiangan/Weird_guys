@@ -1,6 +1,6 @@
 let currentPage = 1;
 const itemsPerPage = 10;
-const API_URL = /*"https://weird-guys-five.vercel.app/api/books";*/"http://localhost:5000/api/books";
+const API_URL = "https://weird-guys-backend.vercel.app/api/books";
 const LOGGED_IN_ADMIN_NAME = localStorage.getItem('adminName') || 'Admin Tak Dikenal';
 
 

@@ -17,7 +17,7 @@ cloudinary.config({
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, 'temp_uploads')); 
+    cb(null, TEMP_UPLOAD_DIR); 
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + '-' + file.originalname);
@@ -25,9 +25,11 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage }); 
 
-const TEMP_UPLOAD_DIR = path.join(__dirname, 'temp_uploads');
+const TEMP_BASE_DIR = '/tmp';
+const TEMP_UPLOAD_DIR = path.join(TEMP_BASE_DIR, 'temp_uploads');
+
 if (!fs.existsSync(TEMP_UPLOAD_DIR)) {
-    fs.mkdirSync(TEMP_UPLOAD_DIR);
+    fs.mkdirSync(TEMP_UPLOAD_DIR, { recursive: true });
 }
 
 
@@ -251,6 +253,17 @@ app.get('/', (req, res) => {
     res.send('Smart Library API sedang berjalan...');
 });
 
-app.listen(PORT, () => {
-  console.log(`Server berjalan di port ${PORT}`);
-});
+const startServer = async () => {
+    try {
+        await db.initializeDatabase();
+        
+        app.listen(PORT, () => {
+          console.log(`Server berjalan di port ${PORT}`);
+        });
+    } catch (error) {
+        console.error("Gagal memulai server:", error);
+        process.exit(1);
+    }
+}
+
+startServer();

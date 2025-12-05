@@ -65,6 +65,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const response = await fetch(API_URL);
       if (!response.ok) throw new Error("Gagal memuat data buku dari server.");
       books = await response.json();
+      // MEMASTIKAN setiap buku memiliki array borrowers yang kosong jika tidak ada data
+      books.forEach(b => {
+          b.borrowers = b.borrowers || [];
+      });
       return books;
     } catch (error) {
       console.error("Error fetching books:", error);
@@ -206,8 +210,9 @@ document.addEventListener("DOMContentLoaded", () => {
           : "";
 
         // TAMPILAN BARU: Tampilkan daftar peminjam dengan detail dan tombol "Dikembalikan"
+        // PASTIKAN b.id digunakan sebagai borrowingId
         const borrowerList = (book.borrowers || [])
-          .map((b, bIdx) => `
+          .map((b) => `
               <div class="bg-gray-100 p-2 rounded mb-2 border border-gray-200">
                 <p class="text-xs text-gray-800 mb-1">
                   <strong>Nama:</strong> ${escapeHtml(b.name)}
@@ -217,7 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 </p>
                 ${b.handledBy ? `<p class="text-xs text-gray-800 mb-2"><strong>Dilayani oleh:</strong> ${escapeHtml(b.handledBy)}</p>` : ''} 
                 <button 
-                  onclick="adminRemoveBorrower(${dbId}, ${bIdx})" 
+                  onclick="adminRemoveBorrower(${dbId}, ${b.id})" // MENGGUNAKAN ID PEMINJAMAN (b.id) dan ID BUKU (dbId)
                   class="w-full px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 transition"
                 >
                   Dikembalikan
@@ -303,9 +308,10 @@ document.addEventListener("DOMContentLoaded", () => {
       method = 'PUT';
       
       const existingBook = books.find(b => b.id === editBookId);
-      formData.append('borrowers_json', JSON.stringify(existingBook.borrowers || [])); 
+      // HAPUS PENGIRIMAN DATA BORROWERS LAMA
+      // formData.append('borrowers_json', JSON.stringify(existingBook.borrowers || [])); 
       
-      // BARU: Pertahankan added_by_admin yang sudah ada
+      // Pertahankan added_by_admin yang sudah ada
       formData.append('added_by_admin', existingBook.added_by_admin || LOGGED_IN_ADMIN_NAME); 
 
 
@@ -323,8 +329,9 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       // Mode Tambah (POST)
       method = 'POST';
-      formData.append('borrowers_json', JSON.stringify([])); 
-      // BARU: Tambahkan nama admin yang sedang login
+      // HAPUS PENGIRIMAN DATA BORROWERS KOSONG
+      // formData.append('borrowers_json', JSON.stringify([])); 
+      // Tambahkan nama admin yang sedang login
       formData.append('added_by_admin', LOGGED_IN_ADMIN_NAME); 
       
       if (f_cover_file.files.length > 0) {
@@ -368,7 +375,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (el) el.classList.add('hidden');
   };
 
-  // adminConfirmBorrow - MENGGUNAKAN FORMDATA
+  // adminConfirmBorrow - MENGGUNAKAN ENDPOINT BARU
   window.adminConfirmBorrow = async (id) => {
     const book = books.find(b => b.id === id);
     if (!book) return alert("Buku tidak ditemukan di cache.");
@@ -380,71 +387,69 @@ document.addEventListener("DOMContentLoaded", () => {
     
     if (!name) return alert("Nama peminjam wajib diisi");
     if (!phone) return alert("Nomor telepon wajib diisi");
+    // Cek stok langsung dari cache
     if (book.stock <= 0) return alert("Stok habis, tidak bisa dipinjam");
     
-    // BARU: Tambahkan field handledBy
-    const borrower = { name, phone, date: new Date().toLocaleString(), handledBy: LOGGED_IN_ADMIN_NAME };
-    book.borrowers = book.borrowers || [];
-    book.borrowers.push(borrower);
-    book.stock = Number(book.stock) - 1;
-
-    book.status = (book.stock > 0) ? "Tersedia" : "Dipinjam";
+    // Data yang akan dikirim ke endpoint baru (POST)
+    const borrowData = { 
+        name, 
+        phone, 
+        handledBy: LOGGED_IN_ADMIN_NAME // Nama admin yang sedang login
+    };
     
-    // Siapkan FormData
-    const formData = new FormData();
-    formData.append('title', book.title || '');
-    formData.append('author', book.author || '');
-    formData.append('publisher', book.publisher || '');
-    formData.append('year', book.year || '');
-    formData.append('category', book.category || '');
-    formData.append('stock', book.stock || 0);
-    formData.append('description', book.description || '');
-    formData.append('status', book.status);
-    formData.append('borrowers_json', JSON.stringify(book.borrowers));
-    if (book.cover) formData.append('existing_cover', book.cover); 
-    // BARU: Sertakan added_by_admin untuk PUT
-    formData.append('added_by_admin', book.added_by_admin || LOGGED_IN_ADMIN_NAME); 
-    
-    const result = await saveBook(formData, 'PUT', id); 
+    try {
+        const response = await fetch(`${API_URL}/${id}/borrow`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(borrowData)
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok) {
+             throw new Error(result.message || 'Gagal memproses peminjaman.');
+        }
 
-    if (result) {
         alert(`Buku "${book.title}" dipinjam oleh ${name}`);
         adminCancelBorrow(id);
-        renderBooks();
+        renderBooks(); // Render ulang untuk memuat data peminjam baru
+    } catch (error) {
+        alert(error.message);
+        console.error("Borrow error:", error);
     }
   };
 
-  // adminRemoveBorrower - MENGGUNAKAN FORMDATA
-  window.adminRemoveBorrower = async (bookId, borrowerIndex) => {
+  // adminRemoveBorrower - MENGGUNAKAN ENDPOINT BARU
+  window.adminRemoveBorrower = async (bookId, borrowingId) => { // Menerima bookId dan borrowingId
     const book = books.find(b => b.id === bookId);
-    if (!book || !book.borrowers || !book.borrowers[borrowerIndex]) return;
+    if (!book) return;
     
     if (!confirm("Yakin ingin mencatat buku ini sudah dikembalikan? (Stok akan bertambah 1)")) return;
     
-    book.borrowers.splice(borrowerIndex, 1);
-    book.stock = Number(book.stock) + 1;
-    book.status = (book.stock > 0) ? "Tersedia" : "Dipinjam";
-    
-    // Siapkan FormData
-    const formData = new FormData();
-    formData.append('title', book.title || '');
-    formData.append('author', book.author || '');
-    formData.append('publisher', book.publisher || '');
-    formData.append('year', book.year || '');
-    formData.append('category', book.category || '');
-    formData.append('stock', book.stock || 0);
-    formData.append('description', book.description || '');
-    formData.append('status', book.status);
-    formData.append('borrowers_json', JSON.stringify(book.borrowers));
-    if (book.cover) formData.append('existing_cover', book.cover); 
-    // BARU: Sertakan added_by_admin untuk PUT
-    formData.append('added_by_admin', book.added_by_admin || LOGGED_IN_ADMIN_NAME); 
-    
-    const result = await saveBook(formData, 'PUT', bookId);
-    
-    if (result) {
+    try {
+        // DELETE ke endpoint baru
+        const response = await fetch(`${API_URL}/${bookId}/borrowings/${borrowingId}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.status !== 204) {
+             // Coba parse JSON error, tapi tangani jika bukan JSON
+             const contentType = response.headers.get("content-type");
+             let errorMessage = 'Gagal memproses pengembalian buku.';
+             if (contentType && contentType.includes("application/json")) {
+                 const errorData = await response.json();
+                 errorMessage = errorData.message || errorMessage;
+             }
+             throw new Error(errorMessage);
+        }
+        
         alert("Buku dicatat sudah dikembalikan dan stok diperbarui.");
-        renderBooks();
+        renderBooks(); // Render ulang untuk memuat data stok dan peminjam terbaru
+    } catch (error) {
+        alert(error.message);
+        console.error("Return error:", error);
     }
   };
 
